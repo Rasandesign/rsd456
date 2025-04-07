@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ورود به راسان دیزاین</title>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      direction: rtl;
+      background-color: #f5f5f5;
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, button:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      animation: buttonAnimation 0.5s ease;
+    }
+
+    button:hover {
+      background-color: #43a047;
+    }
+
+    .message {
+      margin-top: 10px;
+      color: #d32f2f;
+      font-weight: bold;
+      animation: fadeInMessage 1s ease-out;
+    }
+
+    #code-section {
+      display: none;
+      animation: fadeInCode 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(-20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes buttonAnimation {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes fadeInMessage {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes fadeInCode {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ورود با ایمیل</h2>
+    <input type="email" id="email" placeholder="ایمیل خود را وارد کنید">
+    <button onclick="sendCode()">ارسال کد</button>
+
+    <div id="code-section">
+      <input type="text" id="code" placeholder="کد ۱۸ رقمی را وارد کنید">
+      <button onclick="verifyCode()">تأیید کد</button>
+    </div>
+
+    <div class="message" id="message"></div>
+  </div>
+
+  <script>
+    // Public Key جدید که دریافت کردی
+    emailjs.init("iccQZRMkErSE3Sj-z");
+
+    let generatedCode = "";
+    let resendTimeout; // برای تایمر غیرفعال کردن دکمه ارسال کد
+
+    function generateCode(length = 18) {
+      const chars = "0123456789";  // فقط اعداد
+      let code = "";
+      for (let i = 0; i < length; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length)); // تولید عدد
+      }
+      return code;
+    }
+
+    function sendCode() {
+      const email = document.getElementById("email").value.trim();
+      if (!email) {
+        document.getElementById("message").innerText = "لطفاً ایمیل را وارد کنید.";
+        return;
+      }
+
+      // غیرفعال کردن دکمه ارسال کد
+      const sendButton = document.querySelector("button");
+      sendButton.disabled = true;
+      sendButton.innerText = "کد در حال ارسال...";
+
+      generatedCode = generateCode(); // کد فقط عددی
+      const expirationTime = new Date(Date.now() + 15 * 60 * 1000).toLocaleTimeString();
+
+      const templateParams = {
+        email: email, // برای {{email}} در قالب
+        passcode: generatedCode, // برای {{passcode}} در قالب
+        time: expirationTime // برای {{time}} در قالب
+      };
+
+      emailjs.send("service_xz9xzpd", "template_e3w2buk", templateParams)
+        .then(() => {
+          document.getElementById("message").innerText = "کد با موفقیت ارسال شد.";
+          document.getElementById("code-section").style.display = "block";
+        }, (error) => {
+          console.error(error);
+          document.getElementById("message").innerText = "خطا در ارسال ایمیل.";
+        });
+
+      // تنظیم تایمر برای فعال کردن دکمه بعد از 2 دقیقه
+      setTimeout(function() {
+        sendButton.disabled = false;
+        sendButton.innerText = "ارسال کد";
+      }, 120000); // 120000 میلی‌ثانیه معادل 2 دقیقه
+    }
+
+    function verifyCode() {
+      const code = document.getElementById("code").value.trim();
+      if (code === generatedCode) {
+        window.location.href = "https://rasandesign.ir/rsd"; // مقصد بعد از تایید کد
+      } else {
+        document.getElementById("message").innerText = "کد اشتباه است.";
+      }
+    }
+  </script>
+</body>
+</html>
